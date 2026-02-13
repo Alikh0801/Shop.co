@@ -19,3 +19,23 @@ export const getProducts = async (limit: number = 10) => {
         discountPercentage: p.discountPercentage
     }));
 }
+
+export const getProductsById = async (id: string) => {
+    const response = await axios.get(`${BASE_URL}/products/${id}`);
+    const item = response.data;
+
+    return {
+        id: item.id,
+        title: item.title,
+        price: item.price,
+        description: item.description,
+        category: item.category,
+        image: item.thumbnail,
+        images: item.images,
+        rating: {
+            rate: item.rating,
+            count: 120
+        },
+        discountPercentage: item.discountPercentage
+    }
+}
