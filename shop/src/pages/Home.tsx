@@ -12,7 +12,7 @@ function Home() {
     const { items, loading, error } = useSelector((state: RootState) => state.products);
 
     useEffect(() => {
-        dispatch(fetchProducts(8));
+        dispatch(fetchProducts({ limit: 8 }));
     }, [dispatch]);
 
     const newArrivals = items.slice(0, 4);

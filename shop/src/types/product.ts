@@ -13,6 +13,8 @@ export interface Product {
 
 export interface ProductState {
     items: Product[];
+    total: number;
     loading: boolean;
+    loadingMore: boolean;
     error: string | null;
-};
+}
