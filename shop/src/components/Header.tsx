@@ -13,7 +13,9 @@ function Header() {
     const [searchResults, setSearchResults] = useState<Array<{ id: number; title: string; price: number; image: string }>>([]);
     const [searchLoading, setSearchLoading] = useState(false);
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
+    const mobileSearchRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -37,6 +39,9 @@ function Header() {
         function handleClickOutside(e: MouseEvent) {
             if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
                 setShowSearchDropdown(false);
+            }
+            if (mobileSearchRef.current && !mobileSearchRef.current.contains(e.target as Node)) {
+                setIsMobileSearchOpen(false);
             }
         }
         document.addEventListener('mousedown', handleClickOutside);
@@ -99,7 +104,12 @@ function Header() {
                                         <li key={p.id}>
                                             <Link
                                                 to={`/product/${p.id}`}
-                                                onClick={() => { setShowSearchDropdown(false); setSearchQuery(''); }}
+                                                onClick={() => {
+                                                    setTimeout(() => {
+                                                        setShowSearchDropdown(false);
+                                                        setSearchQuery('');
+                                                    }, 100);
+                                                }}
                                                 className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50"
                                             >
                                                 <img src={p.image} alt="" className="w-10 h-10 object-cover rounded" />
@@ -117,7 +127,17 @@ function Header() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Search className="md:hidden cursor-pointer" size={24} />
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setIsMobileSearchOpen((prev) => !prev);
+                            if (!isMobileSearchOpen) setIsMenuOpen(false);
+                        }}
+                        className="md:hidden p-1"
+                        aria-label="Search"
+                    >
+                        <Search size={24} />
+                    </button>
 
                     <Link to="/cart" className="relative cursor-pointer">
                         <ShoppingCart size={24} />
@@ -131,6 +151,70 @@ function Header() {
                     <UserCircle size={24} className="cursor-pointer" />
                 </div>
             </nav>
+
+            {/* Mobil search */}
+            {isMobileSearchOpen && (
+                <div className="md:hidden absolute left-0 right-0 top-full bg-white border-t border-gray-100 shadow-lg z-50" ref={mobileSearchRef}>
+                    <div className="container mx-auto px-4 py-4">
+                        <div className="flex items-center bg-[#F0F0F0] rounded-full px-4 py-2 gap-3 relative">
+                            <Search className="text-gray-400 shrink-0" size={20} />
+                            <input
+                                type="text"
+                                placeholder="Search for products..."
+                                className="bg-transparent outline-none w-full text-sm"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onFocus={() => searchQuery.trim() && setShowSearchDropdown(true)}
+                                autoFocus
+                            />
+                            {searchQuery && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setShowSearchDropdown(false);
+                                    }}
+                                    className="shrink-0"
+                                >
+                                    <X size={18} className="text-gray-400" />
+                                </button>
+                            )}
+                        </div>
+                        {showSearchDropdown && (
+                            <div className="mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-80 overflow-y-auto">
+                                {searchLoading ? (
+                                    <div className="p-4 text-center text-gray-500">Axtarılır...</div>
+                                ) : searchResults.length === 0 ? (
+                                    <div className="p-4 text-center text-gray-500">Nəticə tapılmadı</div>
+                                ) : (
+                                    <ul className="py-2">
+                                        {searchResults.map((p) => (
+                                            <li key={p.id}>
+                                                <Link
+                                                    to={`/product/${p.id}`}
+                                                    onClick={() => {
+                                                        setTimeout(() => {
+                                                            setShowSearchDropdown(false);
+                                                            setSearchQuery('');
+                                                        }, 100);
+                                                    }}
+                                                    className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50"
+                                                >
+                                                    <img src={p.image} alt="" className="w-10 h-10 object-cover rounded" />
+                                                    <div className="flex-1 min-w-0">
+                                                        <span className="font-medium truncate block">{p.title}</span>
+                                                        <span className="text-sm text-gray-500">${p.price}</span>
+                                                    </div>
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* hamburger menyu */}
             {isMenuOpen && (
